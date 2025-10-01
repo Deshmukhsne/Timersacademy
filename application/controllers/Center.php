@@ -130,7 +130,7 @@ class Center extends CI_Controller {
     }
 
     // ---------- Save Staff ----------
-    public function saveStaff() {
+    public function saveStaffold() {
         $input = json_decode(file_get_contents("php://input"), true);
 
         if (empty($input['center_id'])) {
@@ -142,6 +142,39 @@ class Center extends CI_Controller {
 
         echo json_encode(["status" => "success", "staff_id" => $id]);
     }
+public function saveStaff() {
+    $input = json_decode(file_get_contents("php://input"), true);
+
+    if (empty($input['center_id'])) {
+        echo json_encode(["status" => "error", "message" => "center_id required"]);
+        return;
+    }
+$assignedBatchIds = null;
+if (!empty($input['assigned_batch']) && is_array($input['assigned_batch'])) {
+    // extract only the IDs
+    $assignedBatchIds = implode(",", array_map(function($b) {
+        return $b['id'] ?? null;
+    }, $input['assigned_batch']));
+}
+
+$data = [
+    'center_id'      => $input['center_id'],
+    'staff_name'     => $input['staff_name'] ?? '',
+    'contact_no'     => $input['contact_no'] ?? '',
+    'role'           => $input['role'] ?? '',
+    'joining_date'   => $input['joining_date'] ?? null,
+    'assigned_batch' => $assignedBatchIds,
+    'coach_level'    => $input['coach_level'] ?? null,
+    'coach_category' => $input['coach_category'] ?? null,
+    'coach_duration' => $input['coach_duration'] ?? null,
+    'created_at'     => date('Y-m-d H:i:s')
+];
+
+
+    $id = $this->Center_model->insertData("staff", $data);
+
+    echo json_encode(["status" => "success", "staff_id" => $id]);
+}
 
     // ---------- Save Facility ----------
     // Save Facility + Subtypes into facilities table

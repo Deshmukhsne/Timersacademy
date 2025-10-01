@@ -272,6 +272,8 @@ public function add_student_facility($data)
     ];
 }
 //
+
+
 public function get_students()
 {
     $this->db->select('students.*, batches.batch_name as batch_name, batches.category as category, batches.batch_level, center_details.name as center_name');
@@ -279,10 +281,46 @@ public function get_students()
     $this->db->join('batches', 'students.batch_id = batches.id', 'left');
     $this->db->join('center_details', 'students.center_id = center_details.id', 'left'); // if needed
     $query = $this->db->get();
-    // print_r($query->result_array());die;
+    //  print_r($query->result_array());die;
     return $query->result_array();
 }
 
+public function get_studentsbycenter($center_id)
+{
+    $this->db->select('students.*, batches.batch_name as batch_name, batches.category as category, batches.batch_level, center_details.name as center_name');
+    $this->db->from('students');
+    $this->db->join('batches', 'students.batch_id = batches.id', 'left');
+    $this->db->join('center_details', 'students.center_id = center_details.id', 'left'); // if needed
+    $this->db->where('students.center_id', (int) $center_id);
+    $query = $this->db->get();
+    //  print_r($query->result_array());die;
+    return $query->result_array();
+}
+// ---------------------------------------26/9/25-------prajwal
+public function activate_students_for_today() {
+    $today = date('Y-m-d');
 
+    // build & run update
+    $this->db->where('joining_date', $today);
+    $this->db->where('status !=', 'Active');
+    $this->db->update('students', ['status' => 'Active']);
 
+    // Debug info
+    $last_query = $this->db->last_query();
+    log_message('debug', "Activation Query: $last_query");
+
+    $affected = $this->db->affected_rows();
+    log_message('debug', "Activation affected rows: $affected");
+
+    $db_error = $this->db->error(); // array('code','message')
+    if (!empty($db_error['code'])) {
+        log_message('error', "DB error activating students: ({$db_error['code']}) {$db_error['message']}");
+    }
+
+    // also return affected rows for the test route
+    return $affected;
+}
+public function get_coordinator() {
+    return $this->db->get('coordinator')->row_array();
+}
 }
