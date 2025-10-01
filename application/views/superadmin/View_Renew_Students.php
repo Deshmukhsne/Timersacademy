@@ -962,7 +962,7 @@
     const durationSelect = document.getElementById("courseDuration");
     const expiryDateInput = document.getElementById("expiryDate");
 
-
+    
 
     function calculateExpiryDate() {
       let joinDateValue = joinDateInput.value;
